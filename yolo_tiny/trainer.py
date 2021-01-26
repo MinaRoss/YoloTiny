@@ -8,7 +8,7 @@ import torch.nn as nn
 import datetime
 
 
-def Trainer(data_dir):
+def Trainer(data_dir, yolo_net_file_path):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dataset = Sampling(data_dir)
     train_data = DataLoader(dataset=dataset, batch_size=64, shuffle=True)
@@ -68,7 +68,3 @@ def calc_loss(output, label, alpha, loss_fn):
     lossWithoutObj = loss_fn(output[maskWithoutObj][:, 0],
                              label[maskWithoutObj][:, 0])  # For negative samples, it only need to train IOU, but not COORDINATE
     return loss_box_WithObj * alpha + lossWithoutObj * (1 - alpha)
-
-
-if __name__ == '__main__':
-    Trainer(dataset_dir)
