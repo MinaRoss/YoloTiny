@@ -65,7 +65,3 @@ def resize(img, size=(416, 416)):
     expand_img = cv2.copyMakeBorder(img, *expand, borderType=cv2.BORDER_CONSTANT, value=(0, 0, 0))
     ratio = (416 / expand_img.shape[0] + 416 / expand_img.shape[1]) * 0.5
     return cv2.resize(expand_img, size), expand, ratio
-
-
-def calc_area():
-    pass
