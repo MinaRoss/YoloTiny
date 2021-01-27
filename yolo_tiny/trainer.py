@@ -8,15 +8,17 @@ import torch.nn as nn
 import datetime
 
 
-def Trainer(data_dir, yolo_net_file_path, launch_mode):
-    print("")
+def Trainer(data_dir, yolo_net_file_path, launch_mode, epochs, batch_size, anchors, areas, is_new=False):
+    print("[{}][{}]网络训练程序启动中...".format(datetime.datetime.now(), launch_mode))
+    print("**************************************************************")
+    yolo_net_file_dir = "/".join(yolo_net_file_path.split("/")[:-1])
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    dataset = Sampling(data_dir)
-    train_data = DataLoader(dataset=dataset, batch_size=64, shuffle=True)
+    dataset = Sampling(data_dir, anchors, areas)
+    train_data = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True)
 
-    if os.path.exists(yolo_net_file_path):
+    if os.path.exists(yolo_net_file_path) and not is_new:
         yolo = torch.load(yolo_net_file_path, map_location=device.type)
-        print('* LOADED EXISTED NET FILE')
+        print('* 已加载存在的网络文件')
     else:
         yolo = YoloTiny().to(device)
 
@@ -24,15 +26,15 @@ def Trainer(data_dir, yolo_net_file_path, launch_mode):
     optimizer = opt.Adam(yolo.parameters())
     loss_mse = nn.MSELoss()
 
-    epoch = 0
     ave_loss = 1000.
     saved_epoch = 0
-    print('* {}'.format(datetime.datetime.now()))
-    print('* DEVICE : {} | {}'.format(device.type,
-                                      torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'))
-    while True:
+    print('* 使用中的设备 : {} | {}'.format(device.type, torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'))
+    print('* 训练轮次 : {}'.format(epochs))
+    print('* 批次大小 : {}'.format(batch_size))
+    print('* 优化器 : Adam')
+    print("**************************************************************")
+    for epoch in range(epochs):
         sum_loss = 0.
-        epoch += 1
         for idx, (data, label26, label13, cls) in enumerate(train_data):
             cls, label26, label13, data = cls.to(device), label26.to(device), label13.to(device), data.to(device)
             out13, out26, out_cls = yolo(data)
@@ -42,7 +44,7 @@ def Trainer(data_dir, yolo_net_file_path, launch_mode):
             loss_cls = loss_mse(out_cls, cls)
             loss = loss26 + loss13 + loss_cls
             sum_loss += loss
-            print('\r* EPOCH : {} * {}/{} * LOSS : {}'.format(epoch, idx + 1, len(train_data), loss), end='')
+            print('\r* [轮次 : {}][{}/{}] 损失 : {}'.format(epoch, idx + 1, len(train_data), loss), end='')
 
             optimizer.zero_grad()
             loss.backward()
@@ -51,10 +53,17 @@ def Trainer(data_dir, yolo_net_file_path, launch_mode):
         if (sum_loss / len(train_data)) < ave_loss:
             ave_loss = sum_loss / len(train_data)
             saved_epoch = epoch
-            torch.save(yolo, yolo_net_file_path, _use_new_zipfile_serialization=False)
-            print('\r* EPOCH : {} * AVE_LOSS : {} * SAVED'.format(epoch, sum_loss / len(train_data)))
+
+            if not os.path.exists(yolo_net_file_dir):
+                os.makedirs(yolo_net_file_dir)
+
+            if int("".join(torch.__version__.split('.'))) < 160:
+                torch.save(yolo, yolo_net_file_path)
+            else:
+                torch.save(yolo, yolo_net_file_path, _use_new_zipfile_serialization=False)
+            print('\r* [轮次 : {}]平均损失 : {} | 网络文件已保存'.format(epoch, sum_loss / len(train_data)))
         else:
-            print('\r* EPOCH : {} * AVE_LOSS : {} * USING AT {}'.format(epoch, sum_loss / len(train_data), saved_epoch))
+            print('\r* [轮次 : {}]平均损失 : {} | 保存文件为轮次{}网络文件'.format(epoch, sum_loss / len(train_data), saved_epoch))
 
 
 def calc_loss(output, label, alpha, loss_fn):
