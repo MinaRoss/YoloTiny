@@ -8,7 +8,8 @@ import torch.nn as nn
 import datetime
 
 
-def Trainer(data_dir, yolo_net_file_path):
+def Trainer(data_dir, yolo_net_file_path, launch_mode):
+    print("")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dataset = Sampling(data_dir)
     train_data = DataLoader(dataset=dataset, batch_size=64, shuffle=True)

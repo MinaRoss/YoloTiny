@@ -10,7 +10,8 @@ def init_settings(fixed_config_path=r'./config.json'):
     try:
         with open(fixed_config_path, 'r') as f:
             settings = json.load(f)
-            settings['anchors'] = calc_area(settings['anchors'])
+            settings['anchors'] = dict([(int(item[0]), item[1]) for item in settings['anchors'].items()])
+            settings['areas'] = calc_area(settings['anchors'])
         return settings
     except Exception as e:
         print()
@@ -35,3 +36,16 @@ def calc_area(anchors):
     for feature_size in anchors:
         areas[feature_size] = [x * y for x, y in anchors[feature_size]]
     return areas
+
+
+def apply_new_settings(changed_settings, original_settings):
+    for settings_key in changed_settings:
+        original_settings[settings_key] = changed_settings[settings_key]
+    return original_settings
+
+
+def print_settings(settings):
+    print("*---------------------------------------------*")
+    for settings_key in settings:
+        print("[{}]: {}".format(settings_key, settings[settings_key]))
+    print("*---------------------------------------------*")
