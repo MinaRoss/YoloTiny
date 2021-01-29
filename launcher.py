@@ -37,3 +37,5 @@ class Launcher:
                 self.settings['batch_size'],
                 self.settings['anchors'],
                 self.settings['areas'])
+
+        print("[{}][{}]程序完成".format(datetime.datetime.now(), self.launch_mode))

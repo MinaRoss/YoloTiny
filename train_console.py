@@ -1,16 +1,33 @@
 from launcher import Launcher
 import argparse
+import json
 
 
-def extract_args():
-    pass
+def cvt_args2dict(args):
+    filled_settings = {}
+    for args_key, args_value in args._get_kwargs():
+        if args_value:
+            if args_key == 'anchors':
+                args_value = json.loads(args_value)
+            filled_settings[args_key] = args_value
+    return filled_settings
 
 
 if __name__ == '__main__':
+    args_dict = {'mode': ['--mode', None, str, '指定启动模式'],
+                 'dataset_dir': ['--dataset_dir', None, str, '训练数据目录'],
+                 'valid_dir': ['--valid_dir', None, str, '验证数据目录'],
+                 'test_dir': ['--test_dir', None, str, '测试数据目录'],
+                 'net_path': ['--net_path', None, str, '网络保存路径'],
+                 'anchors': ['--anchors', None, str, '目标参考框'],
+                 'epochs': ['--epochs', None, int, '训练轮次'],
+                 'batch_size': ['--batch_size', None, int, '训练批次大小']}
     parser = argparse.ArgumentParser(description='Hyperparams')
-    parser.add_argument('--mode', nargs='?', type=str, default='train',
-                        help='指定启动模式[train 训练模式]')
+    for args_key, args_list in args_dict.items():
+        print("--{}".format(args_key))
+        parser.add_argument(args_list[0], nargs='?', default=args_list[1], type=args_list[2], help=args_list[3])
     parser.set_defaults(tboard=False)
     args = parser.parse_args()
+    filled_settings = cvt_args2dict(args)
     runner = Launcher('console')
-    runner.run()
+    runner.run(filled_settings)

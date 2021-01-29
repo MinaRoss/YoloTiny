@@ -18,7 +18,7 @@ def Trainer(data_dir, yolo_net_file_path, launch_mode, epochs, batch_size, ancho
 
     if os.path.exists(yolo_net_file_path) and not is_new:
         yolo = torch.load(yolo_net_file_path, map_location=device.type)
-        print('* 已加载存在的网络文件')
+        print('* 已加载存在的网络文件 {}'.format(yolo_net_file_path))
     else:
         yolo = YoloTiny().to(device)
 
