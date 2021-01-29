@@ -1,7 +1,7 @@
 import time
 import cv2
 import torch
-from yolo_tiny.utils import resize, nms
+from yolo_tiny.utils import resize, nms, return2RealPosition
 from yolo_tiny.detector import Detector
 from utils import init_settings
 import argparse
@@ -9,7 +9,7 @@ import datetime
 
 
 def Eval(path, net_path=None):
-    img, *_ = resize(cv2.imread(path))
+    img, expand, scale = resize(cv2.imread(path))
     data = torch.tensor(img.transpose([2, 0, 1]) / 255 - 0.5,
                         dtype=torch.float32).unsqueeze(dim=0)
     setting = init_settings('eval')
@@ -29,8 +29,8 @@ def Eval(path, net_path=None):
         print('* NO THINGS CAUGHT')
         return boxes.numpy(), cls
 
-    frame = nms(boxes, 0.5, True).cpu().detach().numpy()  # box_idx, [N, C, CX, CY, W, H]
-    frame = frame[:, 1:]
+    frame = nms(boxes, 0.5, True).cpu().detach().numpy()  # box_idx, [N, IOU, CX, CY, W, H]
+    frame = return2RealPosition(frame[:, 2:], expand, scale)
     print('* NUM OF BOXES : {} / {}'.format(frame.shape[0], boxes.size()[0]))
     return frame, cls
 
