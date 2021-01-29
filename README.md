@@ -1,3 +1,7 @@
+开始项目
+
+    第一次启动，请参考requirement.txt安装
+
 如何训练模型？
 
     1. 从命令行开始 python train_console.py
