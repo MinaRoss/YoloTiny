@@ -18,7 +18,14 @@ class Detector:
         boxes26 = self.boxReturn(idxs26, vectors26, 16, anchors[26]).to(self.device)
         boxes13 = self.boxReturn(idxs13, vectors13, 32, anchors[13]).to(self.device)
 
-        return torch.cat([boxes26, boxes13], dim=0), (cls > 0.5).int()
+        return torch.cat([boxes26, boxes13], dim=0), self.solve_cls(cls)
+
+    def solve_cls(self, cls):
+        cls[:, 0] = (cls[:, 0] > 0.5).int()
+        cls[:, 4] = (cls[:, 4] > 0.5).int()
+        cls[cls[:, 0] == 1., 1:4] = torch.zeros([3]).to(self.device)
+        cls[cls[:, 0] != 1., 1:4] = (cls[cls[:, 0] != 1., 1:4] > 0.5).int()
+        return cls
 
     def boxFilter(self, output, thresh):
         output = output.permute(0, 2, 3, 1)

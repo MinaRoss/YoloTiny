@@ -55,7 +55,3 @@ def print_settings(settings):
     for settings_key in settings:
         print("[{}]: {}".format(settings_key, settings[settings_key]))
     print("*---------------------------------------------*")
-
-
-def extract_settings():
-    pass
