@@ -12,10 +12,10 @@ def Eval(path, net_path=None):
     img, expand, scale = resize(cv2.imread(path))
     data = torch.tensor(img.transpose([2, 0, 1]) / 255 - 0.5,
                         dtype=torch.float32).unsqueeze(dim=0)
-    setting = init_settings('eval')
+    setting = init_settings()
     if net_path:
         setting['net_path'] = net_path
-        print('[{}][{}]指定的网络文件路径已起效'.format(datetime.datetime.now(), 'eval'))
+        print('[{}]指定的网络文件路径已起效'.format(datetime.datetime.now()))
     yolo = Detector(setting['net_path'])
 
     startTime = time.time()
@@ -29,7 +29,6 @@ def Eval(path, net_path=None):
         print('* NO THINGS CAUGHT')
         return boxes.numpy()
 
-    print(boxes.size())
     frame = nms(boxes, 0.5, True).cpu().detach().numpy()  # box_idx, [N, IOU, CX, CY, W, H, CLS]
     frame[:, 2:6] = return2RealPosition(frame[:, 2:6], expand, scale)
     print('* NUM OF BOXES : {} / {}'.format(frame.shape[0], boxes.size()[0]))
