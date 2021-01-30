@@ -26,6 +26,8 @@
         
         img_file_path：图片文件路径
         net_file_path：可指定网络文件路径，默认读取同目录下‘./model/yolo-tiny.pth’
+        
+        注：此种运行方式会把定位结果划到图上展示
     
     2.如果需要在另外的.py文件中调用，调用eval.py中的Eval函数即可，需要以下参数
     
