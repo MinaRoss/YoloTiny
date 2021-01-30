@@ -31,7 +31,7 @@ def Eval(path, net_path=None):
 
     print(boxes.size())
     frame = nms(boxes, 0.5, True).cpu().detach().numpy()  # box_idx, [N, IOU, CX, CY, W, H, CLS]
-    frame = return2RealPosition(frame, expand, scale)
+    frame[:, 2:6] = return2RealPosition(frame[:, 2:6], expand, scale)
     print('* NUM OF BOXES : {} / {}'.format(frame.shape[0], boxes.size()[0]))
     return frame
 
@@ -43,4 +43,11 @@ if __name__ == '__main__':
     parser.set_defaults(tboard=False)
     args = parser.parse_args()
     boxes = Eval(args.path, args.net_path)
-    print(boxes)
+    img = cv2.imread(args.path)
+    for n, iou, x, y, w, h, *cls in boxes:
+        print("* Object IOU : {}".format(iou))
+        print("* Cls : {}".format(cls))
+        x, y, w, h = list(map(int, [x, y, w, h]))
+        img = cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 1)
+    cv2.imshow('detection', img)
+    cv2.waitKey(0)

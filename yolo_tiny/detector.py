@@ -40,6 +40,10 @@ class Detector:
         cx, cy = (idx_cx.float() + vectors[:, 1]) * scaleRate, (idx_cy.float() + vectors[:, 2]) * scaleRate
         w, h = anchors[boxType, 0] * torch.exp(vectors[:, 3]), anchors[boxType, 1] * torch.exp(vectors[:, 4])
         confi = vectors[..., 0]
-        cls = vectors[..., 5:]
+        cls0 = vectors[..., 5]
+        cls1 = vectors[..., 6]
+        cls2 = vectors[..., 7]
+        cls3 = vectors[..., 8]
+        cls4 = vectors[..., 9]
 
-        return torch.stack([batch.float(), confi, cx, cy, w, h, cls], dim=1)
+        return torch.stack([batch.float(), confi, cx, cy, w, h, cls0, cls1, cls2, cls3, cls4], dim=1)

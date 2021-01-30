@@ -9,5 +9,6 @@
   },
   "epochs": 500,
   "batch_size": 2,
-  "mode": "train"
+  "launch_mode": "train",
+  "is_new": false
 }

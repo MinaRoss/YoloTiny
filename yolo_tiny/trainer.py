@@ -8,8 +8,8 @@ import torch.nn as nn
 import datetime
 
 
-def Trainer(data_dir, yolo_net_file_path, launch_mode, epochs, batch_size, anchors, areas, is_new=False):
-    print("[{}][{}]网络训练程序启动中...".format(datetime.datetime.now(), launch_mode))
+def Trainer(data_dir, yolo_net_file_path, epochs, batch_size, anchors, areas, is_new):
+    print("[{}]网络训练程序启动中...".format(datetime.datetime.now()))
     print("**************************************************************")
     yolo_net_file_dir = "/".join(yolo_net_file_path.split("/")[:-1])
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -17,8 +17,12 @@ def Trainer(data_dir, yolo_net_file_path, launch_mode, epochs, batch_size, ancho
     train_data = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True)
 
     if os.path.exists(yolo_net_file_path) and not is_new:
-        yolo = torch.load(yolo_net_file_path, map_location=device.type)
-        print('* 已加载存在的网络文件 {}'.format(yolo_net_file_path))
+        try:
+            yolo = torch.load(yolo_net_file_path, map_location=device.type)
+            print('* 已加载存在的网络文件 {}'.format(yolo_net_file_path))
+        except Exception:
+            print('* 加载存在的网络文件失败，重新获取网络对象')
+            yolo = YoloTiny().to(device)
     else:
         yolo = YoloTiny().to(device)
 
@@ -67,8 +71,8 @@ def Trainer(data_dir, yolo_net_file_path, launch_mode, epochs, batch_size, ancho
 
 def calc_loss(output, label, alpha, loss_fn):
     output = output.permute(0, 2, 3, 1)  # Axis transpose, [N,C,H,W] -> [N,H,W,C]
-    output = output.reshape(output.size()[0], output.size()[1], output.size()[2], 3,
-                            -1)  # At the last dimension, C -> 3 * per box, N batch, [H, W] idx
+    output = output.reshape(output.size()[0], output.size()[1], output.size()[2],
+                            3, -1)  # At the last dimension, C -> 3 * per box, N batch, [H, W] idx
 
     maskWithObj = (label[..., 0] > 0.)
     maskWithoutObj = (label[..., 0] == 0.)
