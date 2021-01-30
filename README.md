@@ -4,7 +4,7 @@
 
 如何训练模型？
 
-    1. 从命令行开始 python train_console.py
+    从命令行开始 python train_console.py
     
         可选参数：
             --mode          启动模式：默认train（目前仅train）
@@ -15,8 +15,6 @@
             --anchors       参考框（注：选填示例 --anchors "{\"13\": [[1, 2]]}"）
             --epochs        训练轮次
             --batch_size    训练批次大小
-    
-    2. 交互界面开始 python train_ui.py
 
 如何使用训练结果
 
