@@ -19,20 +19,21 @@ def Eval(path, net_path=None):
     yolo = Detector(setting['net_path'])
 
     startTime = time.time()
-    boxes, cls = yolo.detect(data, 0.5, setting['anchors'])  # Box <- [batch,confi,cx,cy,w,h,cls]
-    boxes, cls = boxes.cpu(), cls.cpu().detach().numpy()
+    boxes = yolo.detect(data, 0.5, setting['anchors'])  # Box <- [batch,confi,cx,cy,w,h,cls]
+    boxes = boxes.cpu()
     stopTime = time.time()
     print('* ------------------------------------------ *')
     print('* PROCESSING TIME COST : {}'.format(stopTime - startTime))
 
     if boxes.size()[0] == 0:
         print('* NO THINGS CAUGHT')
-        return boxes.numpy(), cls
+        return boxes.numpy()
 
-    frame = nms(boxes, 0.5, True).cpu().detach().numpy()  # box_idx, [N, IOU, CX, CY, W, H]
-    frame = return2RealPosition(frame[:, 2:], expand, scale)
+    print(boxes.size())
+    frame = nms(boxes, 0.5, True).cpu().detach().numpy()  # box_idx, [N, IOU, CX, CY, W, H, CLS]
+    frame = return2RealPosition(frame, expand, scale)
     print('* NUM OF BOXES : {} / {}'.format(frame.shape[0], boxes.size()[0]))
-    return frame, cls
+    return frame
 
 
 if __name__ == '__main__':
@@ -41,6 +42,5 @@ if __name__ == '__main__':
     parser.add_argument('--net_path', nargs='?', default=None, type=str, help='网络路径', required=False)
     parser.set_defaults(tboard=False)
     args = parser.parse_args()
-    boxes, cls = Eval(args.path, args.net_path)
+    boxes = Eval(args.path, args.net_path)
     print(boxes)
-    print(cls)

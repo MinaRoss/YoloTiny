@@ -13,6 +13,8 @@ class Sampling(Dataset):
         self.image_paths = []
         with open(label_path, 'r') as f:
             for line in f.readlines():
+                if line == "\n":
+                    continue
                 file, *label = line.split()
                 self.image_paths.append(os.path.join(image_dir, file))
                 self.labels.append(list(map(lambda x: x.split('.'), label)))
@@ -27,7 +29,7 @@ class Sampling(Dataset):
         img_data = cv2.imread(self.image_paths[index]).transpose([2, 0, 1]).astype(np.float32) / 255 - 0.5
 
         for featureSize, sub_anchors in self.anchors.items():  # per feature size
-            labels[featureSize] = np.zeros(shape=(featureSize, featureSize, 3, 5), dtype=np.float32)
+            labels[featureSize] = np.zeros(shape=(featureSize, featureSize, 3, 10), dtype=np.float32)
             for box in self.labels[index]:
                 cx, cy, w, h, *cls = list(map(int, box))  # centre x & y, w & h
                 cx_offset, cx_idx = math.modf(cx * featureSize / 416)

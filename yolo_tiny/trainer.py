@@ -35,7 +35,7 @@ def Trainer(data_dir, yolo_net_file_path, launch_mode, epochs, batch_size, ancho
     print("**************************************************************")
     for epoch in range(epochs):
         sum_loss = 0.
-        for idx, (data, label26, label13, cls) in enumerate(train_data):
+        for idx, (data, label26, label13) in enumerate(train_data):
             label26, label13, data = label26.to(device), label13.to(device), data.to(device)
             out13, out26 = yolo(data)
 
