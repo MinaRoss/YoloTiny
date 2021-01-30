@@ -63,7 +63,7 @@ class YoloTiny(nn.Module):
 
         self.layer13 = nn.Sequential(
             ConvBlock(256, 512, 3, 1, 1),
-            nn.Conv2d(512, 15, 1, 1)
+            nn.Conv2d(512, 30, 1, 1)
         )
 
         self.layer13_upsample = nn.Sequential(
@@ -73,19 +73,7 @@ class YoloTiny(nn.Module):
 
         self.layer26 = nn.Sequential(
             ConvBlock(384, 256, 3, 1, 1),
-            nn.Conv2d(256, 15, 1, 1)
-        )
-
-        self.layer_category = nn.Sequential(
-            ConvBlock(256, 512, 3, 1),  # 11 * 11
-            ConvBlock(512, 256, 3, 1),  # 9 * 9
-            ConvBlock(256, 128, 3, 1),  # 7 * 7
-            ConvBlock(128, 64, 3, 1),  # 5 * 5
-            ConvBlock(64, 32, 3, 1),  # 3 * 3
-            ConvBlock(32, 16, 3, 1),  # 1 * 1
-
-            nn.Conv2d(16, 5, 1, 1),  # 1 * 1
-            nn.Sigmoid()
+            nn.Conv2d(256, 30, 1, 1)
         )
 
     def forward(self, x):
@@ -97,5 +85,4 @@ class YoloTiny(nn.Module):
 
         layer13_out = self.layer13(backbone13_out)
         layer26_out = self.layer26(stack26)
-        layer_category_out = self.layer_category(backbone13_out).reshape([-1, 5])
-        return layer13_out, layer26_out, layer_category_out
+        return layer13_out, layer26_out

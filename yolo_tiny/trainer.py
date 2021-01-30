@@ -36,13 +36,12 @@ def Trainer(data_dir, yolo_net_file_path, launch_mode, epochs, batch_size, ancho
     for epoch in range(epochs):
         sum_loss = 0.
         for idx, (data, label26, label13, cls) in enumerate(train_data):
-            cls, label26, label13, data = cls.to(device), label26.to(device), label13.to(device), data.to(device)
-            out13, out26, out_cls = yolo(data)
+            label26, label13, data = label26.to(device), label13.to(device), data.to(device)
+            out13, out26 = yolo(data)
 
             loss26 = calc_loss(out26, label26, 0.7, loss_mse)
             loss13 = calc_loss(out13, label13, 0.7, loss_mse)
-            loss_cls = loss_mse(out_cls, cls)
-            loss = loss26 + loss13 + loss_cls
+            loss = loss26 + loss13
             sum_loss += loss
             print('\r* [轮次 : {}][{}/{}] 损失 : {}'.format(epoch, idx + 1, len(train_data), loss), end='')
 
