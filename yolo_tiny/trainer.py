@@ -6,6 +6,7 @@ from .yolo_tiny import YoloTiny
 import torch.optim as opt
 import torch.nn as nn
 import datetime
+import matplotlib.pyplot as plt
 
 
 def Trainer(data_dir, yolo_net_file_path, epochs, batch_size, anchors, areas, is_new):
@@ -32,6 +33,10 @@ def Trainer(data_dir, yolo_net_file_path, epochs, batch_size, anchors, areas, is
 
     ave_loss = 1000.
     saved_epoch = 0
+    plot_interval = 3
+    losses = []
+    plt.figure(figsize=(14., 4.))
+    plt.ion()
     print('* 使用中的设备 : {} | {}'.format(device.type, torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'))
     print('* 训练轮次 : {}'.format(epochs))
     print('* 批次大小 : {}'.format(batch_size))
@@ -47,11 +52,19 @@ def Trainer(data_dir, yolo_net_file_path, epochs, batch_size, anchors, areas, is
             loss13 = calc_loss(out13, label13, 0.7, loss_mse)
             loss = loss26 + loss13
             sum_loss += loss
+            losses.append(loss)
             print('\r* [轮次 : {}][{}/{}] 损失 : {}'.format(epoch, idx + 1, len(train_data), loss), end='')
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
+            if (idx + 1) % plot_interval == 0:
+                plt.clf()
+                plt.xlim([1, int((epochs * len(train_data)) / plot_interval)])
+                plt.ylim([0, max(2.5, max(losses))])
+                plt.plot(losses)
+                plt.pause(0.001)
 
         if (sum_loss / len(train_data)) < ave_loss:
             ave_loss = sum_loss / len(train_data)
