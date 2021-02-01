@@ -24,11 +24,15 @@ if __name__ == '__main__':
                  'anchors': ['--anchors', None, str, '目标参考框'],
                  'epochs': ['--epochs', None, int, '训练轮次'],
                  'batch_size': ['--batch_size', None, int, '训练批次大小'],
-                 'is_new': ['--is_new', False, bool, '指定是否重头训练']}
+                 'is_new': ['--is_new', False, bool, '指定是否重头训练'],
+                 'log_dir': ['--log_dir', None, str, 'Loss画图保存地址'],
+                 'plot_interval': ['--plot_interval', None, int, 'Loss画图的间隔'],
+                 'save_loss_plot': ['--save_loss_plot', False, bool, '是否保存Loss画图'],
+                 'plot_pause': ['--plot_pause', None, float, '画图暂定时长'],
+                 'plot_loss': ['--plot_loss', False, bool, '是否可视化Loss']}
     parser = argparse.ArgumentParser(description='Hyperparams')
     for args_key, args_list in args_dict.items():
         parser.add_argument(args_list[0], nargs='?', default=args_list[1], type=args_list[2], help=args_list[3])
-    parser.set_defaults(tboard=False)
     args = parser.parse_args()
     filled_settings = cvt_args2dict(args)
     runner = Launcher(filled_settings)

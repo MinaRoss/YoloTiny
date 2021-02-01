@@ -10,5 +10,10 @@
   "epochs": 500,
   "batch_size": 2,
   "launch_mode": "train",
-  "is_new": false
+  "is_new": false,
+  "log_dir": "./log",
+  "plot_interval": 3,
+  "save_loss_plot": false,
+  "plot_pause": 0.001,
+  "plot_loss": false
 }

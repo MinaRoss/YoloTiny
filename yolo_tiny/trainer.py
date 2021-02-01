@@ -9,7 +9,7 @@ import datetime
 import matplotlib.pyplot as plt
 
 
-def Trainer(data_dir, yolo_net_file_path, epochs, batch_size, anchors, areas, is_new):
+def Trainer(data_dir, yolo_net_file_path, epochs, batch_size, anchors, areas, is_new, interval, log_dir, save_loss_plot, plot_pause, plot_loss):
     print("[{}]网络训练程序启动中...".format(datetime.datetime.now()))
     print("**************************************************************")
     yolo_net_file_dir = "/".join(yolo_net_file_path.split("/")[:-1])
@@ -33,12 +33,11 @@ def Trainer(data_dir, yolo_net_file_path, epochs, batch_size, anchors, areas, is
 
     ave_loss = 1000.
     saved_epoch = 0
-    plot_interval = 3
-    save_loss_plot = True
-    log_dir = r'./log'
+    plot_interval = min(interval, len(train_data))
     losses = []
-    plt.figure(figsize=(14., 4.))
-    plt.ion()
+    if plot_loss:
+        plt.figure(figsize=(14., 4.))
+        plt.ion()
     print('* 使用中的设备 : {} | {}'.format(device.type, torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'))
     print('* 训练轮次 : {}'.format(epochs))
     print('* 批次大小 : {}'.format(batch_size))
@@ -54,21 +53,22 @@ def Trainer(data_dir, yolo_net_file_path, epochs, batch_size, anchors, areas, is
             loss13 = calc_loss(out13, label13, 0.7, loss_mse)
             loss = loss26 + loss13
             sum_loss += loss
-            losses.append(loss.cpu().detach().numpy())
+            if plot_loss:
+                losses.append(loss.cpu().detach().numpy())
             print('\r* [轮次 : {}][{}/{}] 损失 : {}'.format(epoch, idx + 1, len(train_data), loss), end='')
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-            if ((idx + 1) % plot_interval) == 0:
+            if plot_loss and ((idx + 1) % plot_interval) == 0:
                 plt.clf()
                 plt.xlim([1, epochs * len(train_data)])
                 plt.ylim([0, max(1.2, max(losses))])
                 plt.plot(losses)
                 marker = "^" if losses[-1] > min(losses) else "*"
                 plt.title("- Epoch : {} | Loss : {:.8f} {} | Min Loss : {:.8f} -".format(epoch, losses[-1], marker, min(losses)))
-                plt.pause(0.001)
+                plt.pause(plot_pause)
 
         if (sum_loss / len(train_data)) < ave_loss:
             ave_loss = sum_loss / len(train_data)
@@ -84,15 +84,16 @@ def Trainer(data_dir, yolo_net_file_path, epochs, batch_size, anchors, areas, is
             print('\r* [轮次 : {}]平均损失 : {} | 网络文件已保存'.format(epoch, sum_loss / len(train_data)))
         else:
             print('\r* [轮次 : {}]平均损失 : {} | 保存文件为轮次{}网络文件'.format(epoch, sum_loss / len(train_data), saved_epoch))
-    plt.ioff()
-    print('* 等待操作，请关闭窗口以继续...')
-    plt.show()
-    if save_loss_plot:
-        whole = datetime.datetime.now()
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
-        plt.savefig('./log/{}_{}_{}.jpg'.format(datetime.datetime.date(whole), datetime.datetime.time(whole), epochs))
-        print('* 损失log图已保存 {}'.format(log_dir))
+    if plot_loss:
+        plt.ioff()
+        print('* 等待操作，请关闭窗口以继续...')
+        plt.show()
+        if save_loss_plot:
+            whole = datetime.datetime.now()
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir)
+            plt.savefig('./log/{}_{}_{}.jpg'.format(datetime.datetime.date(whole), datetime.datetime.time(whole), epochs))
+            print('* 损失log图已保存 {}'.format(log_dir))
 
 
 def calc_loss(output, label, alpha, loss_fn):

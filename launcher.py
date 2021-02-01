@@ -17,7 +17,12 @@ class Launcher:
                     self.settings['batch_size'],
                     self.settings['anchors'],
                     self.settings['areas'],
-                    self.settings['is_new'])
+                    self.settings['is_new'],
+                    self.settings['plot_interval'],
+                    self.settings['log_dir'],
+                    self.settings['save_loss_plot'],
+                    self.settings['plot_pause'],
+                    self.settings['plot_loss'])
             print("[{}]程序完成".format(datetime.datetime.now()))
         elif self.settings['launch_mode'] == 'test':
             raise NotImplementedError
