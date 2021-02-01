@@ -10,7 +10,7 @@ def cvt_args2dict(args):
             if args_key == 'anchors':
                 args_value = json.loads(args_value)
             filled_settings[args_key] = args_value
-    if len(filled_settings):
+    if len(filled_settings) == 0:
         return None
     return filled_settings
 
